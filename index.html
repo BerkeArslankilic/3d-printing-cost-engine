@@ -17,11 +17,11 @@
             --accent: #3b82f6;
             --accent-glow: rgba(59, 130, 246, 0.4);
             
-            --c-material: #3b82f6; /* Blue */
-            --c-power: #eab308;    /* Yellow */
-            --c-machine: #a855f7;  /* Purple */
-            --c-labor: #10b981;    /* Green */
-            --c-extra: #f43f5e;    /* Rose */
+            --c-material: #3b82f6;
+            --c-power: #eab308;
+            --c-machine: #a855f7;
+            --c-labor: #10b981;
+            --c-extra: #f43f5e;
             
             --radius: 12px;
             --transition: all 0.2s ease;
@@ -49,6 +49,7 @@
             padding: 15px 40px;
             display: flex;
             align-items: center;
+            justify-content: space-between;
         }
 
         .navbar h1 {
@@ -61,7 +62,7 @@
             gap: 10px;
         }
 
-        .navbar h1 span {
+        .navbar h1 span.gradient-text {
             background: linear-gradient(to right, #3b82f6, #8b5cf6);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -211,7 +212,6 @@
             line-height: 1;
         }
 
-        /* Breakdown Bar */
         .breakdown-bar {
             width: 100%;
             height: 8px;
@@ -250,11 +250,7 @@
             color: var(--text-secondary);
         }
 
-        .dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-        }
+        .dot { width: 10px; height: 10px; border-radius: 50%; }
 
         .cost-item-right {
             font-family: monospace;
@@ -263,13 +259,13 @@
             color: var(--text-primary);
         }
 
-        /* Profit Strategy */
         .strategy-box {
             background: rgba(16, 185, 129, 0.05);
             border: 1px solid rgba(16, 185, 129, 0.2);
             border-radius: var(--radius);
             padding: 20px;
             text-align: center;
+            margin-bottom: 20px;
         }
         
         .strategy-box h4 {
@@ -292,13 +288,39 @@
             font-size: 0.95rem;
             font-weight: 500;
         }
+        
+        .converter-box {
+            background: rgba(59, 130, 246, 0.05);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: var(--radius);
+            padding: 20px;
+        }
+        
+        .converter-box h4 {
+            margin: 0 0 15px 0;
+            color: var(--accent);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-align: center;
+        }
 
     </style>
 </head>
 <body>
 
     <div class="navbar">
-        <h1><span>⚡</span> 3D Printing Cost Engine <small style="font-weight:400; color:var(--text-secondary); margin-left:10px; font-size:0.8rem;">PRO</small></h1>
+        <h1><span>⚡</span> <span class="gradient-text">3D Printing Cost Engine</span> <small style="font-weight:400; color:var(--text-secondary); margin-left:10px; font-size:0.8rem;">PRO</small></h1>
+        
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <span style="color: var(--text-secondary); font-size: 0.85rem;">Currency:</span>
+            <select id="currency-select" style="width: auto; padding: 6px 30px 6px 12px; cursor: pointer;" onchange="updateCurrency()">
+                <option value="$">USD ($)</option>
+                <option value="₺">TRY (₺)</option>
+                <option value="€">EUR (€)</option>
+                <option value="£">GBP (£)</option>
+            </select>
+        </div>
     </div>
 
     <div class="container">
@@ -309,7 +331,7 @@
             <div class="card-grid">
                 <div class="card">
                     <div class="form-group">
-                        <label>Object Weight (Finished) <span id="lbl-weight">150g</span></label>
+                        <label>Object Weight (Finished)</label>
                         <div class="input-group">
                             <input type="number" id="weight" class="has-suffix" value="150" min="0" oninput="calculate()">
                             <span class="input-suffix">g</span>
@@ -318,7 +340,7 @@
                     <div class="form-group">
                         <label>Spool Price</label>
                         <div class="input-group">
-                            <span class="input-prefix">$</span>
+                            <span class="input-prefix currency-sym">$</span>
                             <input type="number" id="spool-price" class="has-prefix" value="25.00" min="0" oninput="calculate()">
                         </div>
                     </div>
@@ -369,7 +391,7 @@
                     <div class="form-group">
                         <label>Electricity Rate</label>
                         <div class="input-group">
-                            <span class="input-prefix">$</span>
+                            <span class="input-prefix currency-sym">$</span>
                             <input type="number" id="kwh-rate" class="has-prefix has-suffix" value="0.15" min="0" step="0.01" oninput="calculate()">
                             <span class="input-suffix">/kWh</span>
                         </div>
@@ -380,7 +402,7 @@
                     <div class="form-group">
                         <label>Printer Purchase Price</label>
                         <div class="input-group">
-                            <span class="input-prefix">$</span>
+                            <span class="input-prefix currency-sym">$</span>
                             <input type="number" id="printer-cost" class="has-prefix" value="800" min="0" oninput="calculate()">
                         </div>
                     </div>
@@ -408,7 +430,7 @@
                     <div class="form-group">
                         <label>Your Hourly Rate</label>
                         <div class="input-group">
-                            <span class="input-prefix">$</span>
+                            <span class="input-prefix currency-sym">$</span>
                             <input type="number" id="labor-rate" class="has-prefix has-suffix" value="25.00" min="0" oninput="calculate()">
                             <span class="input-suffix">/hr</span>
                         </div>
@@ -419,7 +441,7 @@
                     <div class="form-group">
                         <label>Additional Fixed Costs (Per Unit)</label>
                         <div class="input-group">
-                            <span class="input-prefix">$</span>
+                            <span class="input-prefix currency-sym">$</span>
                             <input type="number" id="extra-cost" class="has-prefix" value="1.50" min="0" step="0.10" oninput="calculate()">
                         </div>
                         <small style="color: var(--text-secondary); font-size: 0.75rem; margin-top: 5px; display: block;">Packaging, inserts, glue, paint</small>
@@ -444,11 +466,11 @@
 
             <!-- Visual Bar -->
             <div class="breakdown-bar" id="cost-bar">
-                <div class="bar-segment bg-mat" id="bar-mat" style="width: 20%;"></div>
-                <div class="bar-segment bg-pow" id="bar-pow" style="width: 10%;"></div>
-                <div class="bar-segment bg-mac" id="bar-mac" style="width: 15%;"></div>
-                <div class="bar-segment bg-lab" id="bar-lab" style="width: 45%;"></div>
-                <div class="bar-segment bg-ext" id="bar-ext" style="width: 10%;"></div>
+                <div class="bar-segment bg-mat" id="bar-mat" style="width: 0%;"></div>
+                <div class="bar-segment bg-pow" id="bar-pow" style="width: 0%;"></div>
+                <div class="bar-segment bg-mac" id="bar-mac" style="width: 0%;"></div>
+                <div class="bar-segment bg-lab" id="bar-lab" style="width: 0%;"></div>
+                <div class="bar-segment bg-ext" id="bar-ext" style="width: 0%;"></div>
             </div>
 
             <div class="cost-list">
@@ -481,18 +503,52 @@
                     Net Profit: <span id="out-profit">$0.00</span>
                 </div>
             </div>
+            
+            <!-- Currency Converter -->
+            <div class="converter-box">
+                <h4>Currency Converter</h4>
+                <div class="form-group" style="text-align: left; margin-bottom: 15px;">
+                    <label>Exchange Rate (Multiply by)</label>
+                    <div class="input-group">
+                        <span class="input-prefix">x</span>
+                        <input type="number" id="exchange-rate" class="has-prefix" value="34.50" min="0" step="0.01" oninput="calculate()">
+                    </div>
+                </div>
+                
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <span style="color: var(--text-secondary); font-size: 0.9rem;">Converted Cost:</span>
+                    <span id="out-conv-cost" style="font-family: monospace; font-size: 1.1rem; color: var(--text-primary);">0.00</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="color: var(--text-secondary); font-size: 0.9rem;">Converted Retail:</span>
+                    <span id="out-conv-price" style="font-family: monospace; font-size: 1.2rem; font-weight: bold; color: var(--accent);">0.00</span>
+                </div>
+            </div>
+
         </div>
     </div>
 
     <script>
+        let curSym = '$';
+        
+        function updateCurrency() {
+            curSym = document.getElementById('currency-select').value;
+            const prefixes = document.querySelectorAll('.currency-sym');
+            prefixes.forEach(p => p.innerText = curSym);
+            calculate();
+        }
+
         const getVal = id => Math.max(0, parseFloat(document.getElementById(id).value) || 0);
-        const formatM = num => '$' + num.toFixed(2);
+        
+        // Format with space for EUR/TRY if preferred, but usually directly attached is fine.
+        const formatM = num => curSym + num.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        const formatRaw = num => num.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
 
         function calculate() {
             // Inputs
             const weight = getVal('weight');
             const spoolPrice = getVal('spool-price');
-            const spoolWeight = getVal('spool-weight') || 1; // Prevent div 0
+            const spoolWeight = getVal('spool-weight') || 1;
             const failureRate = getVal('failure-rate') / 100;
 
             const timeHours = getVal('time-hours');
@@ -510,15 +566,17 @@
             
             const extraCost = getVal('extra-cost');
             const markupPct = getVal('markup-pct') / 100;
+            
+            const exchangeRate = getVal('exchange-rate') || 1;
 
-            // Failure Multiplier (If 10% fail, you effectively use 1.1x material and time per successful print)
+            // Failure Multiplier 
             const failMultiplier = 1 / Math.max(0.01, (1 - failureRate));
 
             // Core Math
             const costMaterial = (weight / spoolWeight) * spoolPrice * failMultiplier;
             const costPower = (powerWatts / 1000) * totalHours * kwhRate * failMultiplier;
             const costMachine = (printerCost / lifespan) * totalHours * failMultiplier;
-            const costLabor = (laborMins / 60) * laborRate; // Labor usually isn't multiplied by fail rate unless they prep failed prints too, but let's keep it fixed per successful unit
+            const costLabor = (laborMins / 60) * laborRate; 
             
             const totalCost = costMaterial + costPower + costMachine + costLabor + extraCost;
             const retailPrice = totalCost * (1 + markupPct);
@@ -534,6 +592,10 @@
             document.getElementById('out-total-cost').innerText = formatM(totalCost);
             document.getElementById('out-retail').innerText = formatM(retailPrice);
             document.getElementById('out-profit').innerText = formatM(netProfit);
+            
+            // Exchange Math
+            document.getElementById('out-conv-cost').innerText = formatRaw(totalCost * exchangeRate);
+            document.getElementById('out-conv-price').innerText = formatRaw(retailPrice * exchangeRate);
 
             // Visual Bar Updates
             if (totalCost > 0) {
@@ -554,6 +616,18 @@
                 document.getElementById('lbl-mac-pct').innerText = Math.round(pMac) + '%';
                 document.getElementById('lbl-lab-pct').innerText = Math.round(pLab) + '%';
                 document.getElementById('lbl-ext-pct').innerText = Math.round(pExt) + '%';
+            } else {
+                document.getElementById('bar-mat').style.width = '0%';
+                document.getElementById('bar-pow').style.width = '0%';
+                document.getElementById('bar-mac').style.width = '0%';
+                document.getElementById('bar-lab').style.width = '0%';
+                document.getElementById('bar-ext').style.width = '0%';
+                
+                document.getElementById('lbl-mat-pct').innerText = '0%';
+                document.getElementById('lbl-pow-pct').innerText = '0%';
+                document.getElementById('lbl-mac-pct').innerText = '0%';
+                document.getElementById('lbl-lab-pct').innerText = '0%';
+                document.getElementById('lbl-ext-pct').innerText = '0%';
             }
         }
 

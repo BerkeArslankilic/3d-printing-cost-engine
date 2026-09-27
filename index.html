@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Printing Cost Engine</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #38bdf8; /* Sky Blue */
+            --accent-hover: #0ea5e9;
+            --border-color: #334155;
+            --input-bg: #0f172a;
+            
+            --cost-color: #f43f5e;
+            --price-color: #10b981;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 40px 20px;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 900px;
+            width: 100%;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            margin: 0 0 10px 0;
+            font-size: 2.8rem;
+            color: #fff;
+            letter-spacing: -1px;
+        }
+
+        .header p {
+            color: var(--text-muted);
+            margin: 0;
+            font-size: 1.1rem;
+            line-height: 1.5;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .grid { grid-template-columns: 1fr; }
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .card h2 {
+            margin-top: 0;
+            font-size: 1.2rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 12px;
+            margin-bottom: 20px;
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .prefix {
+            position: absolute;
+            left: 12px;
+            color: var(--text-muted);
+        }
+
+        .suffix {
+            position: absolute;
+            right: 12px;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--input-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+        
+        input[type="number"].has-prefix { padding-left: 30px; }
+        input[type="number"].has-suffix { padding-right: 45px; }
+
+        input[type="number"]:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
+        }
+
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 18px;
+            background-color: var(--accent);
+            color: #0f172a;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 30px;
+        }
+
+        .btn:hover { background-color: var(--accent-hover); transform: translateY(-2px); }
+        .btn:active { transform: translateY(0); }
+
+        .results {
+            display: none;
+            background-color: var(--card-bg);
+            border: 1px solid var(--accent);
+            border-radius: 16px;
+            padding: 30px;
+            animation: slideUp 0.5s ease-out;
+        }
+
+        .results.active { display: block; }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        @media (max-width: 600px) {
+            .result-grid { grid-template-columns: 1fr; }
+        }
+
+        .cost-breakdown {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .cost-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 1rem;
+        }
+
+        .cost-row:last-child { border-bottom: none; padding-bottom: 0; }
+        .cost-label { color: var(--text-muted); }
+        .cost-value { font-weight: 600; font-family: monospace; font-size: 1.1rem; }
+
+        .summary-box {
+            text-align: center;
+            padding: 25px;
+            border-radius: 12px;
+            background-color: var(--input-bg);
+            border: 1px solid var(--border-color);
+        }
+
+        .summary-box.total-cost { border-color: var(--cost-color); }
+        .summary-box.final-price { border-color: var(--price-color); background-color: rgba(16, 185, 129, 0.05); }
+
+        .summary-label { font-size: 1rem; color: var(--text-muted); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; }
+        .summary-value { font-size: 2.5rem; font-weight: 800; }
+        
+        .total-cost .summary-value { color: var(--cost-color); }
+        .final-price .summary-value { color: var(--price-color); }
+        
+        .profit-margin {
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>3D Printing Cost Engine</h1>
+        <p>A precision pricing tool for long-term 3D printing runs. Adjust all variables to figure out exact costs and optimal pricing.</p>
+    </div>
+
+    <div class="grid">
+        <!-- Material & Print Data -->
+        <div class="card">
+            <h2>🧱 Material & Print Time</h2>
+            <div class="form-group">
+                <label>Object Weight (grams)</label>
+                <div class="input-wrapper">
+                    <input type="number" id="weight" class="has-suffix" value="150" min="0.1" step="0.1">
+                    <span class="suffix">g</span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Filament Cost per Spool (1kg)</label>
+                <div class="input-wrapper">
+                    <span class="prefix">$</span>
+                    <input type="number" id="filament-cost" class="has-prefix" value="25.00" min="0" step="0.50">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Total Print Time (Hours)</label>
+                <div class="input-wrapper">
+                    <input type="number" id="print-time" class="has-suffix" value="12.5" min="0.1" step="0.1">
+                    <span class="suffix">hrs</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Machine & Power -->
+        <div class="card">
+            <h2>⚡ Power & Depreciation</h2>
+            <div class="form-group">
+                <label>Printer Power Consumption (Watts)</label>
+                <div class="input-wrapper">
+                    <input type="number" id="power-watts" class="has-suffix" value="250" min="10">
+                    <span class="suffix">W</span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Electricity Cost per kWh</label>
+                <div class="input-wrapper">
+                    <span class="prefix">$</span>
+                    <input type="number" id="kwh-cost" class="has-prefix" value="0.15" min="0" step="0.01">
+                </div>
+            </div>
+            <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 0;">
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label>Printer Cost ($)</label>
+                    <input type="number" id="printer-cost" value="800" min="0">
+                </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label>Lifespan (hrs)</label>
+                    <input type="number" id="lifespan" value="5000" min="100">
+                </div>
+            </div>
+        </div>
+
+        <!-- Labor & Markup -->
+        <div class="card" style="grid-column: 1 / -1;">
+            <h2>🧑‍🔧 Labor & Business Strategy</h2>
+            <div class="grid" style="margin-bottom: 0;">
+                <div class="form-group">
+                    <label>Prep/Post-Processing Time (Minutes)</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="labor-time" class="has-suffix" value="15" min="0">
+                        <span class="suffix">min</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Hourly Labor Rate</label>
+                    <div class="input-wrapper">
+                        <span class="prefix">$</span>
+                        <input type="number" id="labor-rate" class="has-prefix" value="20.00" min="0">
+                    </div>
+                </div>
+                <div class="form-group" style="grid-column: 1 / -1;">
+                    <label>Target Markup / Profit Margin (%)</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="markup-pct" class="has-suffix" value="150" min="0">
+                        <span class="suffix">%</span>
+                    </div>
+                    <small style="color: var(--text-muted); display: block; margin-top: 5px;">A 100% markup means your price is double the cost.</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button class="btn" onclick="calculateCosts()">Calculate Pricing Strategy</button>
+
+    <div class="results" id="results-section">
+        <div class="result-grid">
+            <div class="cost-breakdown">
+                <h3 style="margin-top: 0; color: var(--text-main);">Cost Breakdown</h3>
+                <div class="cost-row">
+                    <span class="cost-label">Material (Filament) Cost</span>
+                    <span class="cost-value" id="res-material">$0.00</span>
+                </div>
+                <div class="cost-row">
+                    <span class="cost-label">Electricity Cost</span>
+                    <span class="cost-value" id="res-power">$0.00</span>
+                </div>
+                <div class="cost-row">
+                    <span class="cost-label">Machine Depreciation</span>
+                    <span class="cost-value" id="res-depreciation">$0.00</span>
+                </div>
+                <div class="cost-row">
+                    <span class="cost-label">Labor Cost</span>
+                    <span class="cost-value" id="res-labor">$0.00</span>
+                </div>
+            </div>
+            
+            <div style="display: flex; flex-direction: column; gap: 20px;">
+                <div class="summary-box total-cost">
+                    <div class="summary-label">Total Manufacturing Cost</div>
+                    <div class="summary-value" id="res-total-cost">$0.00</div>
+                </div>
+                
+                <div class="summary-box final-price">
+                    <div class="summary-label">Recommended Retail Price</div>
+                    <div class="summary-value" id="res-final-price">$0.00</div>
+                    <div class="profit-margin">
+                        Profit per unit: <strong id="res-profit" style="color: var(--text-main);">$0.00</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function calculateCosts() {
+        // Retrieve values
+        const weight = Math.max(0, parseFloat(document.getElementById('weight').value) || 0);
+        const filamentCost = Math.max(0, parseFloat(document.getElementById('filament-cost').value) || 0);
+        const printTime = Math.max(0, parseFloat(document.getElementById('print-time').value) || 0);
+        
+        const powerWatts = Math.max(0, parseFloat(document.getElementById('power-watts').value) || 0);
+        const kwhCost = Math.max(0, parseFloat(document.getElementById('kwh-cost').value) || 0);
+        const printerCost = Math.max(0, parseFloat(document.getElementById('printer-cost').value) || 0);
+        const lifespan = Math.max(1, parseFloat(document.getElementById('lifespan').value) || 1); // Avoid div by 0
+        
+        const laborTime = Math.max(0, parseFloat(document.getElementById('labor-time').value) || 0);
+        const laborRate = Math.max(0, parseFloat(document.getElementById('labor-rate').value) || 0);
+        const markupPct = Math.max(0, parseFloat(document.getElementById('markup-pct').value) || 0);
+
+        // Calculations
+        const materialCost = (weight / 1000) * filamentCost;
+        
+        // (Watts / 1000) = kW * Hours = kWh * Cost
+        const electricityCost = (powerWatts / 1000) * printTime * kwhCost;
+        
+        const depreciation = (printerCost / lifespan) * printTime;
+        
+        const laborCost = (laborTime / 60) * laborRate;
+        
+        const totalCost = materialCost + electricityCost + depreciation + laborCost;
+        
+        const finalPrice = totalCost * (1 + (markupPct / 100));
+        const profit = finalPrice - totalCost;
+
+        // Formatting function
+        const formatMoney = (amount) => '$' + amount.toFixed(2);
+
+        // Update DOM
+        document.getElementById('res-material').innerText = formatMoney(materialCost);
+        document.getElementById('res-power').innerText = formatMoney(electricityCost);
+        document.getElementById('res-depreciation').innerText = formatMoney(depreciation);
+        document.getElementById('res-labor').innerText = formatMoney(laborCost);
+        
+        document.getElementById('res-total-cost').innerText = formatMoney(totalCost);
+        document.getElementById('res-final-price').innerText = formatMoney(finalPrice);
+        document.getElementById('res-profit').innerText = formatMoney(profit);
+
+        // Show results
+        const resultsSection = document.getElementById('results-section');
+        resultsSection.classList.add('active');
+        
+        // Scroll to results
+        setTimeout(() => {
+            resultsSection.scrollIntoView({ behavior: 'smooth', block: 'end' });
+        }, 100);
+    }
+</script>
+
+</body>
+</html>

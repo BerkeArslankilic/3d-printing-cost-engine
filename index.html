@@ -398,29 +398,14 @@
                     </div>
                 </div>
 
-                <div class="card">
-                    <div class="form-group">
-                        <label>Printer Purchase Price</label>
-                        <div class="input-group">
-                            <span class="input-prefix currency-sym">$</span>
-                            <input type="number" id="printer-cost" class="has-prefix" value="800" min="0" oninput="calculate()">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label>Estimated Lifespan (Hours)</label>
-                        <div class="input-group">
-                            <input type="number" id="lifespan" class="has-suffix" value="5000" min="1" oninput="calculate()">
-                            <span class="input-suffix">hrs</span>
-                        </div>
-                    </div>
-                </div>
+
             </div>
 
             <div class="section-title">Labor & Post-Processing</div>
             <div class="card-grid">
                 <div class="card">
                     <div class="form-group">
-                        <label>Hands-on Labor Time</label>
+                        <label>Hands on Labor Time</label>
                         <div class="input-group">
                             <input type="number" id="labor-mins" class="has-suffix" value="15" min="0" oninput="calculate()">
                             <span class="input-suffix">min</span>
@@ -468,7 +453,7 @@
             <div class="breakdown-bar" id="cost-bar">
                 <div class="bar-segment bg-mat" id="bar-mat" style="width: 0%;"></div>
                 <div class="bar-segment bg-pow" id="bar-pow" style="width: 0%;"></div>
-                <div class="bar-segment bg-mac" id="bar-mac" style="width: 0%;"></div>
+
                 <div class="bar-segment bg-lab" id="bar-lab" style="width: 0%;"></div>
                 <div class="bar-segment bg-ext" id="bar-ext" style="width: 0%;"></div>
             </div>
@@ -482,10 +467,7 @@
                     <div class="cost-item-left"><div class="dot bg-pow"></div> Electricity <span style="font-size: 0.75rem; opacity: 0.5;" id="lbl-pow-pct">0%</span></div>
                     <div class="cost-item-right" id="out-pow">$0.00</div>
                 </div>
-                <div class="cost-item">
-                    <div class="cost-item-left"><div class="dot bg-mac"></div> Machine Wear <span style="font-size: 0.75rem; opacity: 0.5;" id="lbl-mac-pct">0%</span></div>
-                    <div class="cost-item-right" id="out-mac">$0.00</div>
-                </div>
+
                 <div class="cost-item">
                     <div class="cost-item-left"><div class="dot bg-lab"></div> Labor <span style="font-size: 0.75rem; opacity: 0.5;" id="lbl-lab-pct">0%</span></div>
                     <div class="cost-item-right" id="out-lab">$0.00</div>
@@ -557,9 +539,6 @@
 
             const powerWatts = getVal('power-watts');
             const kwhRate = getVal('kwh-rate');
-            
-            const printerCost = getVal('printer-cost');
-            const lifespan = getVal('lifespan') || 1;
 
             const laborMins = getVal('labor-mins');
             const laborRate = getVal('labor-rate');
@@ -575,17 +554,15 @@
             // Core Math
             const costMaterial = (weight / spoolWeight) * spoolPrice * failMultiplier;
             const costPower = (powerWatts / 1000) * totalHours * kwhRate * failMultiplier;
-            const costMachine = (printerCost / lifespan) * totalHours * failMultiplier;
             const costLabor = (laborMins / 60) * laborRate; 
             
-            const totalCost = costMaterial + costPower + costMachine + costLabor + extraCost;
+            const totalCost = costMaterial + costPower + costLabor + extraCost;
             const retailPrice = totalCost * (1 + markupPct);
             const netProfit = retailPrice - totalCost;
 
             // DOM Updates - Values
             document.getElementById('out-mat').innerText = formatM(costMaterial);
             document.getElementById('out-pow').innerText = formatM(costPower);
-            document.getElementById('out-mac').innerText = formatM(costMachine);
             document.getElementById('out-lab').innerText = formatM(costLabor);
             document.getElementById('out-ext').innerText = formatM(extraCost);
             
@@ -601,31 +578,26 @@
             if (totalCost > 0) {
                 const pMat = (costMaterial / totalCost) * 100;
                 const pPow = (costPower / totalCost) * 100;
-                const pMac = (costMachine / totalCost) * 100;
                 const pLab = (costLabor / totalCost) * 100;
                 const pExt = (extraCost / totalCost) * 100;
 
                 document.getElementById('bar-mat').style.width = pMat + '%';
                 document.getElementById('bar-pow').style.width = pPow + '%';
-                document.getElementById('bar-mac').style.width = pMac + '%';
                 document.getElementById('bar-lab').style.width = pLab + '%';
                 document.getElementById('bar-ext').style.width = pExt + '%';
                 
                 document.getElementById('lbl-mat-pct').innerText = Math.round(pMat) + '%';
                 document.getElementById('lbl-pow-pct').innerText = Math.round(pPow) + '%';
-                document.getElementById('lbl-mac-pct').innerText = Math.round(pMac) + '%';
                 document.getElementById('lbl-lab-pct').innerText = Math.round(pLab) + '%';
                 document.getElementById('lbl-ext-pct').innerText = Math.round(pExt) + '%';
             } else {
                 document.getElementById('bar-mat').style.width = '0%';
                 document.getElementById('bar-pow').style.width = '0%';
-                document.getElementById('bar-mac').style.width = '0%';
                 document.getElementById('bar-lab').style.width = '0%';
                 document.getElementById('bar-ext').style.width = '0%';
                 
                 document.getElementById('lbl-mat-pct').innerText = '0%';
                 document.getElementById('lbl-pow-pct').innerText = '0%';
-                document.getElementById('lbl-mac-pct').innerText = '0%';
                 document.getElementById('lbl-lab-pct').innerText = '0%';
                 document.getElementById('lbl-ext-pct').innerText = '0%';
             }

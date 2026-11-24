@@ -56,6 +56,8 @@ let curSym = '$';
             document.getElementById('out-total-cost').innerText = formatM(totalCost);
             document.getElementById('out-retail').innerText = formatM(retailPrice);
             document.getElementById('out-profit').innerText = formatM(netProfit);
+            document.getElementById('out-margin').innerText = (retailPrice > 0 ? (netProfit / retailPrice) * 100 : 0).toFixed(1) + '%';
+            document.getElementById('out-per-gram').innerText = formatM(weight > 0 ? totalCost / weight : 0);
             
             // Exchange Math
             document.getElementById('out-conv-cost').innerText = formatRaw(totalCost * exchangeRate);

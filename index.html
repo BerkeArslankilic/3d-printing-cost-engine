@@ -3,212 +3,180 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Printing Cost Engine</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <title>3D Printing Cost Engine · Berke Arslankılıç</title>
+    <meta name="description" content="Per-part cost and pricing for FDM print runs: material, electricity, labor, failure buffer and markup.">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23111114'/%3E%3Crect x='9' y='9' width='14' height='14' fill='%23D6131D'/%3E%3C/svg%3E">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400..900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
-    <div class="navbar">
-        <h1><span>⚡</span> <span style="color: #fff;">3D Printing Cost Engine</span></h1>
-        
-        <div style="display: flex; align-items: center; gap: 10px;">
-            <span style="color: var(--text-secondary); font-size: 0.85rem;">Currency:</span>
-            <select id="currency-select" style="width: auto; padding: 6px 30px 6px 12px; cursor: pointer;" onchange="updateCurrency()">
-                <option value="$">USD ($)</option>
-                <option value="₺">TRY (₺)</option>
-                <option value="€">EUR (€)</option>
-                <option value="£">GBP (£)</option>
-            </select>
-        </div>
-    </div>
-
-    <div class="container">
-        <!-- Inputs Column -->
-        <div class="inputs-col">
-            
-            <div class="section-title">Material Parameters</div>
-            <div class="card-grid">
-                <div class="card">
-                    <div class="form-group">
-                        <label>Object Weight (Finished)</label>
-                        <div class="input-group">
-                            <input type="number" id="weight" class="has-suffix" value="150" min="0" oninput="calculate()">
-                            <span class="input-suffix">g</span>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label>Spool Price</label>
-                        <div class="input-group">
-                            <span class="input-prefix currency-sym">$</span>
-                            <input type="number" id="spool-price" class="has-prefix" value="25.00" min="0" oninput="calculate()">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label>Spool Weight</label>
-                        <div class="input-group">
-                            <input type="number" id="spool-weight" class="has-suffix" value="1000" min="1" oninput="calculate()">
-                            <span class="input-suffix">g</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="card">
-                    <div class="form-group">
-                        <label>Expected Failure Rate <span title="Accounts for reprints and wasted material">ℹ️</span></label>
-                        <div class="input-group">
-                            <input type="number" id="failure-rate" class="has-suffix" value="5" min="0" max="100" oninput="calculate()">
-                            <span class="input-suffix">%</span>
-                        </div>
-                        <small style="color: var(--text-secondary); font-size: 0.75rem; margin-top: 5px; display: block;">Adds a buffer to material & time costs</small>
-                    </div>
-                </div>
+    <header class="topbar">
+        <div class="wrap">
+            <a href="https://berkearslankilic.github.io/" class="brand">← BERKE ARSLANKILIÇ</a>
+            <div class="top-actions">
+                <label for="currency-select" class="hide-sm">Currency</label>
+                <select id="currency-select" class="select" onchange="updateCurrency()">
+                    <option value="$">USD ($)</option>
+                    <option value="₺">TRY (₺)</option>
+                    <option value="€">EUR (€)</option>
+                    <option value="£">GBP (£)</option>
+                </select>
+                <a href="https://github.com/BerkeArslankilic/3d-printing-cost-engine" target="_blank" rel="noopener" class="hide-sm">Source ↗</a>
             </div>
+        </div>
+    </header>
 
-            <div class="section-title">Machine & Time Variables</div>
-            <div class="card-grid">
-                <div class="card">
-                    <div class="form-group">
-                        <label>Total Print Time</label>
-                        <div class="form-row">
-                            <div class="input-group">
-                                <input type="number" id="time-hours" class="has-suffix" value="12" min="0" oninput="calculate()">
-                                <span class="input-suffix">hrs</span>
+    <main class="wrap">
+        <section class="page-head">
+            <div class="eyebrow">Additive Manufacturing · Costing</div>
+            <h1>3D Printing Cost Engine</h1>
+            <p class="lede">Breaks a printed part down into material, energy, labor and fixed costs, adds a failure buffer, and suggests a retail price from your target markup.</p>
+        </section>
+
+        <div class="workspace">
+            <!-- Girdiler -->
+            <div class="stack">
+                <div class="panel">
+                    <div class="panel-head"><span><span class="no">01</span>Material</span></div>
+                    <div class="panel-body">
+                        <div class="field">
+                            <label for="weight">Part weight <small>finished, incl. supports</small></label>
+                            <div class="input"><input type="number" id="weight" value="150" min="0" oninput="calculate()"><span class="unit">g</span></div>
+                        </div>
+                        <div class="row2">
+                            <div class="field">
+                                <label for="spool-price">Spool price</label>
+                                <div class="input"><span class="pre currency-sym">$</span><input type="number" id="spool-price" value="25.00" min="0" oninput="calculate()"></div>
                             </div>
-                            <div class="input-group">
-                                <input type="number" id="time-mins" class="has-suffix" value="30" min="0" max="59" oninput="calculate()">
-                                <span class="input-suffix">min</span>
+                            <div class="field">
+                                <label for="spool-weight">Spool weight</label>
+                                <div class="input"><input type="number" id="spool-weight" value="1000" min="1" oninput="calculate()"><span class="unit">g</span></div>
                             </div>
                         </div>
-                    </div>
-                    <div class="form-group">
-                        <label>Printer Power Draw</label>
-                        <div class="input-group">
-                            <input type="number" id="power-watts" class="has-suffix" value="250" min="0" oninput="calculate()">
-                            <span class="input-suffix">W</span>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label>Electricity Rate</label>
-                        <div class="input-group">
-                            <span class="input-prefix currency-sym">$</span>
-                            <input type="number" id="kwh-rate" class="has-prefix has-suffix" value="0.15" min="0" step="0.01" oninput="calculate()">
-                            <span class="input-suffix">/kWh</span>
+                        <div class="field">
+                            <label for="failure-rate">Expected failure rate</label>
+                            <div class="input"><input type="number" id="failure-rate" value="5" min="0" max="100" oninput="calculate()"><span class="unit">%</span></div>
+                            <span class="hint">Adds a reprint buffer to material and energy cost.</span>
                         </div>
                     </div>
                 </div>
 
+                <div class="panel">
+                    <div class="panel-head"><span><span class="no">02</span>Machine &amp; Time</span></div>
+                    <div class="panel-body">
+                        <div class="field">
+                            <label for="time-hours">Print time</label>
+                            <div class="row2">
+                                <div class="input"><input type="number" id="time-hours" value="12" min="0" oninput="calculate()"><span class="unit">h</span></div>
+                                <div class="input"><input type="number" id="time-mins" value="30" min="0" max="59" oninput="calculate()"><span class="unit">min</span></div>
+                            </div>
+                        </div>
+                        <div class="row2">
+                            <div class="field">
+                                <label for="power-watts">Power draw</label>
+                                <div class="input"><input type="number" id="power-watts" value="250" min="0" oninput="calculate()"><span class="unit">W</span></div>
+                            </div>
+                            <div class="field">
+                                <label for="kwh-rate">Electricity</label>
+                                <div class="input"><span class="pre currency-sym">$</span><input type="number" id="kwh-rate" value="0.15" min="0" step="0.01" oninput="calculate()"><span class="unit">/kWh</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
+                <div class="panel">
+                    <div class="panel-head"><span><span class="no">03</span>Labor &amp; Pricing</span></div>
+                    <div class="panel-body">
+                        <div class="row2">
+                            <div class="field">
+                                <label for="labor-mins">Hands-on time</label>
+                                <div class="input"><input type="number" id="labor-mins" value="15" min="0" oninput="calculate()"><span class="unit">min</span></div>
+                            </div>
+                            <div class="field">
+                                <label for="labor-rate">Hourly rate</label>
+                                <div class="input"><span class="pre currency-sym">$</span><input type="number" id="labor-rate" value="25.00" min="0" oninput="calculate()"><span class="unit">/h</span></div>
+                            </div>
+                        </div>
+                        <span class="hint" style="margin-top:6px">Prep, slicing, support removal.</span>
+                        <div class="row2">
+                            <div class="field">
+                                <label for="extra-cost">Fixed extras</label>
+                                <div class="input"><span class="pre currency-sym">$</span><input type="number" id="extra-cost" value="1.50" min="0" step="0.10" oninput="calculate()"></div>
+                            </div>
+                            <div class="field">
+                                <label for="markup-pct">Markup</label>
+                                <div class="input"><input type="number" id="markup-pct" value="100" min="0" oninput="calculate()"><span class="unit">%</span></div>
+                            </div>
+                        </div>
+                        <span class="hint" style="margin-top:6px">Extras: packaging, inserts, glue, paint (per unit).</span>
+                    </div>
+                </div>
             </div>
 
-            <div class="section-title">Labor & Post-Processing</div>
-            <div class="card-grid">
-                <div class="card">
-                    <div class="form-group">
-                        <label>Hands on Labor Time</label>
-                        <div class="input-group">
-                            <input type="number" id="labor-mins" class="has-suffix" value="15" min="0" oninput="calculate()">
-                            <span class="input-suffix">min</span>
-                        </div>
-                        <small style="color: var(--text-secondary); font-size: 0.75rem; margin-top: 5px; display: block;">Prep, slicing, removing supports</small>
+            <!-- Sonuçlar -->
+            <div class="stack">
+                <div class="hero-result">
+                    <div>
+                        <div class="kpi-label">Recommended retail price</div>
+                        <div class="big" id="out-retail">$0.00</div>
+                        <span class="tag ok">Profit <span id="out-profit">$0.00</span></span>
                     </div>
-                    <div class="form-group">
-                        <label>Your Hourly Rate</label>
-                        <div class="input-group">
-                            <span class="input-prefix currency-sym">$</span>
-                            <input type="number" id="labor-rate" class="has-prefix has-suffix" value="25.00" min="0" oninput="calculate()">
-                            <span class="input-suffix">/hr</span>
-                        </div>
+                    <div>
+                        <div class="kpi-label">Total production cost</div>
+                        <div class="kpi-value" id="out-total-cost" style="font-size:36px;margin-top:10px">$0.00</div>
+                        <div class="kpi-sub">Per unit, including failure buffer</div>
                     </div>
                 </div>
-                
-                <div class="card">
-                    <div class="form-group">
-                        <label>Additional Fixed Costs (Per Unit)</label>
-                        <div class="input-group">
-                            <span class="input-prefix currency-sym">$</span>
-                            <input type="number" id="extra-cost" class="has-prefix" value="1.50" min="0" step="0.10" oninput="calculate()">
+
+                <div class="panel">
+                    <div class="panel-head"><span><span class="no">04</span>Cost Breakdown</span><span class="aside">share of cost</span></div>
+                    <div class="panel-body">
+                        <div class="loss-bar">
+                            <div id="bar-mat" style="background:var(--c1)"></div>
+                            <div id="bar-pow" style="background:var(--warn)"></div>
+                            <div id="bar-lab" style="background:var(--c2)"></div>
+                            <div id="bar-ext" style="background:var(--c3)"></div>
                         </div>
-                        <small style="color: var(--text-secondary); font-size: 0.75rem; margin-top: 5px; display: block;">Packaging, inserts, glue, paint</small>
+                        <div class="loss-legend">
+                            <div><i style="background:var(--c1)"></i><span>Material</span><b id="out-mat">$0.00</b><em id="lbl-mat-pct">0%</em></div>
+                            <div><i style="background:var(--warn)"></i><span>Electricity</span><b id="out-pow">$0.00</b><em id="lbl-pow-pct">0%</em></div>
+                            <div><i style="background:var(--c2)"></i><span>Labor</span><b id="out-lab">$0.00</b><em id="lbl-lab-pct">0%</em></div>
+                            <div><i style="background:var(--c3)"></i><span>Extras</span><b id="out-ext">$0.00</b><em id="lbl-ext-pct">0%</em></div>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label>Profit Markup Target</label>
-                        <div class="input-group">
-                            <input type="number" id="markup-pct" class="has-suffix" value="100" min="0" oninput="calculate()">
-                            <span class="input-suffix">%</span>
+                    <div class="method">
+                        <div><h4>Failure buffer</h4><code>m = 1 / (1 − r_fail)</code><p>Applied to material and energy; labor and extras are counted once.</p></div>
+                        <div><h4>Material</h4><code>(w / W_spool) · P_spool · m</code><p>Filament used, priced per gram.</p></div>
+                        <div><h4>Energy</h4><code>(P / 1000) · t · c_kWh · m</code><p>Average draw over the whole print.</p></div>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-head"><span><span class="no">05</span>Currency Converter</span></div>
+                    <div class="panel-body">
+                        <div class="field">
+                            <label for="exchange-rate">Exchange rate <small>multiply by</small></label>
+                            <div class="input"><span class="pre">×</span><input type="number" id="exchange-rate" value="34.50" min="0" step="0.01" oninput="calculate()"></div>
+                        </div>
+                        <div class="rows">
+                            <div class="r"><span>Converted cost</span><span class="v" id="out-conv-cost">0.00</span></div>
+                            <div class="r"><span>Converted retail</span><span class="v" id="out-conv-price" style="color:var(--red-hi);font-weight:700">0.00</span></div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+    </main>
 
-        <!-- Results Column -->
-        <div class="results-panel">
-            <div class="total-cost-display">
-                <h3>Total Production Cost</h3>
-                <p class="main-price" id="out-total-cost">$0.00</p>
-            </div>
-
-            <!-- Visual Bar -->
-            <div class="breakdown-bar" id="cost-bar">
-                <div class="bar-segment bg-mat" id="bar-mat" style="width: 0%;"></div>
-                <div class="bar-segment bg-pow" id="bar-pow" style="width: 0%;"></div>
-
-                <div class="bar-segment bg-lab" id="bar-lab" style="width: 0%;"></div>
-                <div class="bar-segment bg-ext" id="bar-ext" style="width: 0%;"></div>
-            </div>
-
-            <div class="cost-list">
-                <div class="cost-item">
-                    <div class="cost-item-left"><div class="dot bg-mat"></div> Material <span style="font-size: 0.75rem; opacity: 0.5;" id="lbl-mat-pct">0%</span></div>
-                    <div class="cost-item-right" id="out-mat">$0.00</div>
-                </div>
-                <div class="cost-item">
-                    <div class="cost-item-left"><div class="dot bg-pow"></div> Electricity <span style="font-size: 0.75rem; opacity: 0.5;" id="lbl-pow-pct">0%</span></div>
-                    <div class="cost-item-right" id="out-pow">$0.00</div>
-                </div>
-
-                <div class="cost-item">
-                    <div class="cost-item-left"><div class="dot bg-lab"></div> Labor <span style="font-size: 0.75rem; opacity: 0.5;" id="lbl-lab-pct">0%</span></div>
-                    <div class="cost-item-right" id="out-lab">$0.00</div>
-                </div>
-                <div class="cost-item">
-                    <div class="cost-item-left"><div class="dot bg-ext"></div> Extras & Packaging <span style="font-size: 0.75rem; opacity: 0.5;" id="lbl-ext-pct">0%</span></div>
-                    <div class="cost-item-right" id="out-ext">$0.00</div>
-                </div>
-            </div>
-
-            <div class="strategy-box">
-                <h4>Recommended Retail Price</h4>
-                <p class="retail-price" id="out-retail">$0.00</p>
-                <div class="profit-margin">
-                    Profit: <span id="out-profit">$0.00</span>
-                </div>
-            </div>
-            
-            <!-- Currency Converter -->
-            <div class="converter-box">
-                <h4>Currency Converter</h4>
-                <div class="form-group" style="text-align: left; margin-bottom: 15px;">
-                    <label>Exchange Rate (Multiply by)</label>
-                    <div class="input-group">
-                        <span class="input-prefix">x</span>
-                        <input type="number" id="exchange-rate" class="has-prefix" value="34.50" min="0" step="0.01" oninput="calculate()">
-                    </div>
-                </div>
-                
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                    <span style="color: var(--text-secondary); font-size: 0.9rem;">Converted Cost:</span>
-                    <span id="out-conv-cost" style="font-family: monospace; font-size: 1.1rem; color: var(--text-primary);">0.00</span>
-                </div>
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <span style="color: var(--text-secondary); font-size: 0.9rem;">Converted Retail:</span>
-                    <span id="out-conv-price" style="font-family: monospace; font-size: 1.2rem; font-weight: bold; color: var(--accent);">0.00</span>
-                </div>
-            </div>
-
+    <footer class="foot">
+        <div class="wrap">
+            <span>© 2026 Berke Arslankılıç</span>
+            <a href="https://github.com/BerkeArslankilic/3d-printing-cost-engine" target="_blank" rel="noopener">View source on GitHub ↗</a>
         </div>
-    </div>
+    </footer>
 
     <script src="js/script.js"></script>
 </body>

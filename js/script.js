@@ -10,8 +10,8 @@ let curSym = '$';
         const getVal = id => Math.max(0, parseFloat(document.getElementById(id).value) || 0);
         
         // Format with space for EUR/TRY if preferred, but usually directly attached is fine.
-        const formatM = num => curSym + num.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
-        const formatRaw = num => num.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        const formatM = num => curSym + num.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        const formatRaw = num => num.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
 
         function calculate() {
             // Inputs
